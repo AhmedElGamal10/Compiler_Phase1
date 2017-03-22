@@ -15,13 +15,13 @@ struct Sorter {
     }
 };
 
-std::map<std::string, std::vector, Sorter<>> defs;
+std::map<std::string, std::vector<std::string>, Sorter<>> defs;
 
-FileParser() {
+FileParser::FileParser() {
 
 }
 
-void trimAndSave(std::string line) {
+void FileParser::trimAndSave(std::string line) {
 
     std::size_t firstSpaceOccur = line.find_first_not_of(" ");
     line = line.substr(firstSpaceOccur);
@@ -33,7 +33,7 @@ void trimAndSave(std::string line) {
 }
 
 //lack loop for all RHS values
-std::vector<std::string> parseRHS(std::string RHS, char symbol) {
+std::vector<std::string> FileParser::parseRHS(std::string RHS, char symbol) {
     std::vector<std::string> RHS_parsed;
 
     std::stringstream ss;
@@ -46,7 +46,7 @@ std::vector<std::string> parseRHS(std::string RHS, char symbol) {
 }
 
 
-void identifyDefs() {
+void FileParser::identifyDefs() {
     int linesCount = lines.size();
 
     for (int i = 0; i < linesCount; ++i) {
@@ -67,9 +67,9 @@ void identifyDefs() {
 }
 
 
-void replaceDefs() {
+void FileParser::replaceDefs() {
 
-    for (std::map<std::string, std::vector>::iterator it = defs.begin(); it != defs.end(); ++it) {
+    for (std::map<std::string, std::vector<std::string>>::iterator it = defs.begin(); it != defs.end(); ++it) {
         std::string originalDef = it->first;
         std::string singleChar = it->second[0];
 
@@ -102,7 +102,7 @@ void replaceDefs() {
 
 void FileParser::parseFile() {
     std::string line;
-    std::ifstream myfile("rules.txt");
+    std::ifstream myfile("/home/ahmed/Compiler_Phase1/rules.txt");
     if (myfile.is_open()) {
         while (getline(myfile, line)) {
             trimAndSave(line);
