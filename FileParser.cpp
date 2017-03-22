@@ -10,6 +10,9 @@ class FileParser {
     const int DEF = 3;
     const int EXP = 4;
     const int ERR = 5;
+    FileParser() {
+        memset(FileParser::puncSymbols, false, sizeof(FileParser::puncSymbols));
+    }
 
     int classifyLine(std::string line) {
         int length = line.length();
@@ -20,7 +23,7 @@ class FileParser {
             return PUNC;
 
 
-        for (int i = 0; i < length; i++)
+        for (int i = 0; i < length; ++i)
             if (line.at(i) == ':')
                 return DEF;
             else if (line.at(i) == '=')
@@ -38,12 +41,29 @@ class FileParser {
         return false;
     }
 
+
+    bool splitAndFillTable(std::string &line, int length, int type){
+
+        line.erase(std::remove(line.begin(), line.end(), '\\'), line.end());
+        
+        for(int i=0 ; i < length; ++i){
+
+        }
+
+
+
+
+
+
+
+    }
+
     bool parse(std::string line, int &length, int type) {
         if ((type == KEYWORD) || type == PUNC) {
             if(!trim(line, length))
                 return false;
 
-            splitAndFillTable(line);
+            splitAndFillTable(line, length, type);
 
         }else if(type == DEF){
 
@@ -54,11 +74,14 @@ class FileParser {
         return false;
     }
 
-    void FileParser::parse(std::string line) {
+
+
+    void FileParser::parse(std::string &line) {
         line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
         int type = classifyLine(line);
+        int length = line.length();
 
-        bool parse(line, type);
+        parse(line, length, type);
 
 
     }
