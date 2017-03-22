@@ -1,3 +1,37 @@
+#include<bits/stdc++.h>
+#include "FileParser.h"
+
+using namespace std;
+
+int main(){
+//    std::string line = "     [; ,]   ";
+//    std::size_t firstSpaceOccur = line.find_first_not_of(" ");
+//    line = line.substr(firstSpaceOccur);
+//    std::size_t lastSpaceOccur = line.find_last_not_of(" ");
+//    line = line.substr(0, lastSpaceOccur+1);
+//
+//    cout << firstSpaceOccur << " " << lastSpaceOccur << endl << line << endl;
+//    std::map<std::string ,std::vector> mm;
+//
+//    std::vector<char> vv;
+//    vv.push_back('a');
+//    vv.push_back('b');
+//    vv.push_back('c');
+//
+//    <std::string ,std::vector> mm;
+//    mm["30"] = vv;
+//    for (std::map<std::string ,std::vector>::iterator it=mm.begin(); it!=mm.end(); ++it)
+//        std::cout << it->first << " => " << '\n';
+
+    FileParser ff;
+    ff.parseFile();
+    ff.identifyDefs();
+    ff.replaceDefs();
+
+    return 0;
+}
+
+
 //#include<bits/stdc++.h>
 //
 //using namespace std;

@@ -3,86 +3,112 @@
 //
 
 #include "FileParser.h"
-class FileParser {
 
-    const int KEYWORD = 1;
-    const int PUNC = 2;
-    const int DEF = 3;
-    const int EXP = 4;
-    const int ERR = 5;
-    FileParser() {
-        memset(FileParser::puncSymbols, false, sizeof(FileParser::puncSymbols));
-    }
+std::vector<std::string> lines;
 
-    int classifyLine(std::string line) {
-        int length = line.length();
-
-        if (line.at(0) == '{')
-            return KEYWORD;
-        else if (line.at(1) == '[')
-            return PUNC;
-
-
-        for (int i = 0; i < length; ++i)
-            if (line.at(i) == ':')
-                return DEF;
-            else if (line.at(i) == '=')
-                return EXP;
-
-        return ERR;
-    }
-
-    bool trim (std::string &line, int &length){
-        if( (line.at(0) == '{' && line.at(length-1) == '}') || (line.at(0) == '[' && line.at(length-1) == ']') ) {
-            line = line.substr(1, length-2);
-            return true;
-        }
-
-        return false;
-    }
-
-
-    bool splitAndFillTable(std::string &line, int length, int type){
-
-        line.erase(std::remove(line.begin(), line.end(), '\\'), line.end());
-        
-        for(int i=0 ; i < length; ++i){
-
-        }
-
-
-
-
-
-
-
-    }
-
-    bool parse(std::string line, int &length, int type) {
-        if ((type == KEYWORD) || type == PUNC) {
-            if(!trim(line, length))
-                return false;
-
-            splitAndFillTable(line, length, type);
-
-        }else if(type == DEF){
-
-        }else if(type == EXP){
-
-        }
-
-        return false;
-    }
-
-
-
-    void FileParser::parse(std::string &line) {
-        line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
-        int type = classifyLine(line);
-        int length = line.length();
-
-        parse(line, length, type);
-
-
+template<bool sortdir = true>
+struct Sorter {
+    bool operator()(const std::string &left, const std::string &right) {
+        if (sortdir)
+            return left < right;
+        return left > right;
     }
 };
+
+std::map<std::string, std::vector, Sorter<>> defs;
+
+FileParser() {
+
+}
+
+void trimAndSave(std::string line) {
+
+    std::size_t firstSpaceOccur = line.find_first_not_of(" ");
+    line = line.substr(firstSpaceOccur);
+
+    std::size_t lastSpaceOccur = line.find_last_not_of(" ");
+    line = line.substr(0, lastSpaceOccur + 1);
+
+    lines.push_back(line);
+}
+
+//lack loop for all RHS values
+std::vector<std::string> parseRHS(std::string RHS, char symbol) {
+    std::vector<std::string> RHS_parsed;
+
+    std::stringstream ss;
+    std::string s;
+    ss << symbol;
+    ss >> s;
+    RHS_parsed.push_back(s);
+
+    return RHS_parsed;
+}
+
+
+void identifyDefs() {
+    int linesCount = lines.size();
+
+    for (int i = 0; i < linesCount; ++i) {
+        std::string line = lines[i];
+        std::size_t equalIndex = line.find_first_of("=");
+        std::size_t colonIndex = line.find_first_of(":");
+
+        if (equalIndex < colonIndex) {
+            line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
+            equalIndex = line.find_first_of("=");
+            std::string LHS = line.substr(0, equalIndex);
+            std::string RHS = line.substr(equalIndex + 1, line.length() - 1);
+
+            defs[LHS] = parseRHS(RHS, 'a' + i);
+        }
+    }
+
+}
+
+
+void replaceDefs() {
+
+    for (std::map<std::string, std::vector>::iterator it = defs.begin(); it != defs.end(); ++it) {
+        std::string originalDef = it->first;
+        std::string singleChar = it->second[0];
+
+        for (int i = 0; i < lines.size(); ++i) {
+            std::string line = lines[i];
+
+            if (line.find(originalDef) != std::string::npos) {
+                std::cout << "found!" << '\n';
+
+                size_t index = 0;
+                while (index < line.length()) {
+                    /* Locate the substring to replace. */
+                    index = line.find(originalDef, index);
+                    if (index == std::string::npos)
+                        break;
+
+                    /* Make the replacement. */
+                    line.replace(index, 1, singleChar);
+
+                    /* Advance index forward so the next iteration doesn't pick it up as well. */
+                    index += 1;
+                }
+            }
+
+            lines[i] = line;
+        }
+    }
+}
+
+
+void FileParser::parseFile() {
+    std::string line;
+    std::ifstream myfile("rules.txt");
+    if (myfile.is_open()) {
+        while (getline(myfile, line)) {
+            trimAndSave(line);
+        }
+        myfile.close();
+    } else
+        std::cout << "Unable to open file";
+}
+

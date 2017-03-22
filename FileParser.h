@@ -3,29 +3,27 @@
 //
 
 #include "bits/stdc++.h"
+
 #ifndef CPP_FILEPARSER_H
 #define CPP_FILEPARSER_H
 
-class FileParser{
+class FileParser {
 
 
 public:
-    std::map<std::string, std::string> symbolTable;
     FileParser();
+
+    void parseFile();
+
+    void identifyDefs();
+
+    void replaceDefs();
 
 
 private:
-    void parse(std::string);
-    int classifyLine(std::string);
-    bool puncSymbols[200];
+    std::vector<std::string> parseRHS(std::string RHS, char symbol);
 
-    const int KEYWORD;
-    const int PUNC;
-    const int DEF;
-    const int EXP;
-    const int ERR;
-
-
+    void trimAndSave(std::string);
 };
 
 #endif //CPP_FILEPARSER_H
