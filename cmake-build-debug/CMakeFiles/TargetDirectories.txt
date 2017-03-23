@@ -1,0 +1,3 @@
+/home/ahmed/Compiler_Phase1/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/ahmed/Compiler_Phase1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/ahmed/Compiler_Phase1/cmake-build-debug/CMakeFiles/cpp.dir
