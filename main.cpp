@@ -19,7 +19,7 @@ struct operatorSym {
     int priority;
 };
 
-operatorSym  orSym, concatSym, closureSym, parenOpenSym, parenCloseSym;
+operatorSym orSym, concatSym, closureSym, parenOpenSym, parenCloseSym;
 
 void setupOperators() {
     orSym.symbol = '|';
@@ -201,12 +201,10 @@ void addConcatenation() {
 }
 
 void extractKeywords() {
-
 }
 
 
 void extractPunctuation() {
-
 
 }
 
@@ -224,6 +222,7 @@ operatorSym selectOperator(char c) {
     else if (c == parenCloseSym.symbol) return parenCloseSym;
 }
 
+
 string makeString(queue<char> queue) {
     stringstream ss;
     string s;
@@ -240,13 +239,14 @@ void constructPostfix() {
     queue<char> operands;
 
     for (int i = 0; i < regExpressions.size(); ++i) {
+
         for (int j = 0; j < regExpressions[i].length(); ++j) {
 
             char c = regExpressions[i][j];
 
             if (isOperator(c)) {
                 operatorSym tempOperator = selectOperator(c);
-                if (tempOperator.priority > operators.top().priority)
+                if (!operators.empty() && tempOperator.priority == operators.top().priority)
                     operands.push(c);
                 else
                     operators.push(tempOperator);
@@ -254,13 +254,15 @@ void constructPostfix() {
                 operands.push(c);
             }
 
-            if (c == ')') {
+            if (c == ')'){
                 operators.pop();
                 while (operators.top().symbol != parenOpenSym.symbol) {
                     char temp = operators.top().symbol;
-                    operands.push(temp);
+                    if(temp != parenOpenSym.symbol)
+                        operands.push(temp);
                     operators.pop();
                 }
+                operators.pop();
             }
         }
         while (operators.size() > 0) {
@@ -269,12 +271,13 @@ void constructPostfix() {
         }
 
         postfixExpressions.push_back(makeString(operands));
+        cout << postfixExpressions[i] << endl;
     }
 }
 
 void evaluatePostfix(){
 
-    for(int i = 0; i < postfixExpressions.size(); ++i){
+    for (int i = 0; i < postfixExpressions.size(); ++i) {
 //        stack<Graph>
 
 
@@ -292,8 +295,10 @@ void identifyExp(vector<string> lines) {
 
     for (int i = 0; i < lines.size(); ++i) {
         size_t found = lines[i].find(":");
-        if (found != std::string::npos)
-            regExpressions.push_back(lines[i]);
+        if (found != std::string::npos) {
+            regExpressions.push_back(lines[i].substr(found+1,std::string::npos));
+            cout << regExpressions[regExpressions.size()-1] << endl;
+        }
     }
 
 }
@@ -331,11 +336,13 @@ int main() {
         trimAndSave(file[i]);
     }
 
+    setupOperators();
 
     identifyDefs();
     replaceDefs();
     addConcatenation();
-
+    identifyExp(lines);
+    constructPostfix();
     return 0;
 }
 
