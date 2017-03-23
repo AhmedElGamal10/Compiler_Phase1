@@ -3,20 +3,23 @@
 //
 
 #include "bits/stdc++.h"
+#include "Graph.h"
 
 using namespace std;
 
 vector<string> lines;
 vector<string> regExpressions;
+vector<string> postfixExpressions;
+
 vector<char> symbols;
 
-
-struct operatorSym
 
 struct operatorSym {
     char symbol;
     int priority;
-} orSym, concatSym, closureSym, parenOpenSym, parenCloseSym;
+};
+
+operatorSym  orSym, concatSym, closureSym, parenOpenSym, parenCloseSym;
 
 void setupOperators() {
     orSym.symbol = '|';
@@ -267,9 +270,23 @@ void constructPostfix() {
 
         postfixExpressions.push_back(makeString(operands));
     }
-
-
 }
+
+void evaluatePostfix(){
+
+    for(int i = 0; i < postfixExpressions.size(); ++i){
+//        stack<Graph>
+
+
+
+
+
+
+
+
+    }
+}
+
 
 void identifyExp(vector<string> lines) {
 

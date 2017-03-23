@@ -10,5 +10,6 @@ CMakeFiles/cpp.dir/FileParser.cpp.o: ../FileParser.cpp
 CMakeFiles/cpp.dir/Graph.cpp.o: ../Graph.cpp
 CMakeFiles/cpp.dir/Graph.cpp.o: ../Graph.h
 
+CMakeFiles/cpp.dir/main.cpp.o: ../Graph.h
 CMakeFiles/cpp.dir/main.cpp.o: ../main.cpp
 
