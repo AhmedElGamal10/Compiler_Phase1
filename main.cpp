@@ -306,11 +306,26 @@ Graph applyConcatenation(Graph graph1, Graph graph2) {
 Graph applyOr(Graph graph1, Graph graph2) {
     Graph newGraph;
 
+    graph1.start.type = 1;
+    graph2.start.type = 1;
+
+    graph1.accepting.type = 1;
+    graph2.accepting.type = 1;
+
     newGraph.start.next[EPS].push_back(graph1.start);
     newGraph.start.next[EPS].push_back(graph2.start);
 
+    if (graph1.closureApplied)
+        newGraph.start.next[EPS].push_back(graph1.accepting);
+
+    if (graph2.closureApplied)
+        newGraph.start.next[EPS].push_back(graph2.accepting);
+
+
     graph1.accepting.next[EPS].push_back(newGraph.accepting);
     graph2.accepting.next[EPS].push_back(newGraph.accepting);
+
+    return newGraph;
 }
 
 void applyKleeneClosure(Graph &tempGraph) {
