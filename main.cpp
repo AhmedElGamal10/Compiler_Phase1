@@ -409,6 +409,10 @@ void evaluatePostfix() {
     }
 }
 
+Graph getNFAGraph(){
+    return graphsStack.top();
+}
+
 
 void parseFile() {
     string line;
