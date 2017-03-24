@@ -16,7 +16,7 @@ class State {
 public:
     int type;   //0 -> start    1->intermediate     2-accepting
     string forTransition;   //"letter"  "digit"     "digits"
-    map<char, vector<State>> next;
+    map<string, vector<State>> next;
 };
 
 #endif //CPP_STATE_H

@@ -21,7 +21,7 @@ public:
 };
 
 
-const char EPS = ':';
+const string EPS = "#";
 
 vector<string> lines;
 vector<string> regExpressions;
@@ -282,13 +282,60 @@ void constructPostfix() {
 }
 
 vector<State> graph;
-stack<Graph> wholeGraph;
+stack<Graph> graphsStack;
 
 
+Graph applyConcatenation(Graph graph1, Graph graph2) {
+    graph1.accepting.next[] = graph2.start;
+}
+
+void applyOr(){
+
+}
+
+void applyKleeneClosure(Graph &tempGraph){
+
+}
+
+void applyPositiveClosure(Graph &tempGraph){
+
+}
+
+
+void makeOperation(stack<Graph> &graphsStack, char &i) {
+
+    if(i == '*'){
+        Graph tempGraph = graphsStack.top();
+        graphsStack.pop();
+        applyKleeneClosure(tempGraph);
+        graphsStack.push(tempGraph);
+    }else if(i == '|'){
+        applyOr();
+    }else if(i == '~'){
+        //aab and I wanna concate a and b --> graph1: a, graph2: b
+
+        //graph2: b
+        Graph tempGraph2 = graphsStack.top();
+        graphsStack.pop();
+
+        //graph1: a
+        Graph tempGraph1 = graphsStack.top();
+        graphsStack.pop();
+
+        Graph resultGraph = applyConcatenation(tempGraph1, tempGraph2);
+        graphsStack.push(resultGraph);
+    }else if(i == '+'){
+        Graph tempGraph = graphsStack.top();
+        graphsStack.pop();
+        applyPositiveClosure(tempGraph);
+    }
+
+
+
+}
 
 void evaluatePostfix(){
-    State start;
-    start.type = 0;
+
     for (int i = 0; i < postfixExpressions.size(); ++i) {
         for(int j = 0; j < postfixExpressions[i].length(); ++j){
             if(isSymbol(postfixExpressions[i][j])){
@@ -301,33 +348,23 @@ void evaluatePostfix(){
                 acceptingState.type = 2;
 
                 startState.next[EPS].push_back(intermediateState);
-                intermediateState.next[transitionType[postfixExpressions[i][j]]].push_back(acceptingState);
-                //acceptingState.next
+                intermediateState.next[EPS].push_back(acceptingState);
+                //acceptingState.next[transitionType[postfixExpressions[i][j]]];
 
                 Graph singleStateGraph;
                 singleStateGraph.start = startState;
                 singleStateGraph.intermediate.push_back(intermediateState);
                 singleStateGraph.accepting = acceptingState;
 
-                wholeGraph.push(singleStateGraph);
+                graphsStack.push(singleStateGraph);
+            }
+            else if(isOperator(postfixExpressions[i][j])){
+                makeOperation(graphsStack, postfixExpressions[i][j]);
             }
         }
 
 
     }
-}
-
-
-void orOperation(){
-
-}
-
-void concatOperation(){
-
-}
-
-void closureOperation(){
-
 }
 
 
