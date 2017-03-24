@@ -4,8 +4,24 @@
 
 #include "bits/stdc++.h"
 #include "Graph.h"
+#include "State.h"
 
 using namespace std;
+
+struct operatorSym {
+    char symbol;
+    int priority;
+}orSym, concatSym, closureSym, parenOpenSym, parenCloseSym;
+
+class compare {
+public:
+    bool operator()(pair<string, vector<string>> a, pair<string, vector<string>> b) {
+        return a.first.length() < b.first.length();
+    }
+};
+
+
+const char EPS = ':';
 
 vector<string> lines;
 vector<string> regExpressions;
@@ -13,13 +29,10 @@ vector<string> postfixExpressions;
 
 vector<char> symbols;
 
+priority_queue<pair<string, vector<string>>, vector<pair<string, vector<string>>>, compare> pq;
 
-struct operatorSym {
-    char symbol;
-    int priority;
-};
-
-operatorSym orSym, concatSym, closureSym, parenOpenSym, parenCloseSym;
+vector<State> states;
+map <char, string> transitionType;
 
 void setupOperators() {
     orSym.symbol = '|';
@@ -39,31 +52,6 @@ void setupOperators() {
 }
 
 
-class compare {
-public:
-    bool operator()(pair<string, vector<string>> a, pair<string, vector<string>> b) {
-        return a.first.length() < b.first.length();
-    }
-};
-
-priority_queue<pair<string, vector<string>>, vector<pair<string, vector<string>>>, compare> pq;
-
-
-void trimAndSave(string &line) {
-
-    size_t firstSpaceOccur = line.find_first_not_of(" ");
-    line = line.substr(firstSpaceOccur);
-
-//    cout << line << endl;
-
-    size_t lastSpaceOccur = line.find_last_not_of(" ");
-    line = line.substr(0, lastSpaceOccur + 1);
-
-//    cout << line << endl;
-
-    lines.push_back(line);
-}
-
 //lack loop for all RHS values
 vector<string> parseRHS(string RHS, char symbol) {
     vector<string> RHS_parsed;
@@ -77,6 +65,33 @@ vector<string> parseRHS(string RHS, char symbol) {
     return RHS_parsed;
 }
 
+bool isOperator(char c) {
+    return (c == orSym.symbol || c == concatSym.symbol || c == closureSym.symbol || c == parenOpenSym.symbol
+            || c == parenCloseSym.symbol);
+}
+
+bool isSymbol(char c) {
+    return (std::find(symbols.begin(), symbols.end(), c) != symbols.end());
+}
+
+operatorSym selectOperator(char c) {
+    if (c == orSym.symbol) return orSym;
+    else if (c == concatSym.symbol) return concatSym;
+    else if (c == closureSym.symbol) return closureSym;
+    else if (c == parenOpenSym.symbol) return parenOpenSym;
+    else if (c == parenCloseSym.symbol) return parenCloseSym;
+}
+
+string makeString(queue<char> queue) {
+    stringstream ss;
+    string s;
+    while (queue.size() > 0) {
+        ss << queue.front();
+        queue.pop();
+    }
+    ss >> s;
+    return s;
+}
 
 bool tokenReplace(int type, int pointer, string &line, string originalDef, string newToken) {
 
@@ -105,8 +120,20 @@ bool tokenReplace(int type, int pointer, string &line, string originalDef, strin
         }
         return (index > 0);
     }
+}
 
 
+
+//*******************************************************************************************
+void trimAndSave(string &line) {
+
+    size_t firstSpaceOccur = line.find_first_not_of(" ");
+    line = line.substr(firstSpaceOccur);
+
+    size_t lastSpaceOccur = line.find_last_not_of(" ");
+    line = line.substr(0, lastSpaceOccur + 1);
+
+    lines.push_back(line);
 }
 
 void identifyDefs() {
@@ -125,11 +152,23 @@ void identifyDefs() {
 
             pq.push(make_pair(LHS, parseRHS(RHS, 'a' + i)));
             symbols.push_back('a' + i);
+            transitionType['a' + i] = LHS;
         }
     }
 
 }
 
+void identifyExp(vector<string> lines) {
+
+    for (int i = 0; i < lines.size(); ++i) {
+        size_t found = lines[i].find(":");
+        if (found != std::string::npos) {
+            regExpressions.push_back(lines[i].substr(found+1,std::string::npos));
+//            cout << regExpressions[regExpressions.size()-1] << endl;
+        }
+    }
+
+}
 
 void replaceDefs() {
 
@@ -152,9 +191,6 @@ void replaceDefs() {
 }
 
 
-bool isSymbol(char c) {
-    return (std::find(symbols.begin(), symbols.end(), c) != symbols.end());
-}
 
 void addConcatenation() {
 
@@ -168,7 +204,6 @@ void addConcatenation() {
         }
 
         lines[i].erase(remove(lines[i].begin(), lines[i].end(), ' '), lines[i].end());
-        cout << lines[i] << endl;
 
         int startIndex = lines[i].find(":");
 
@@ -193,11 +228,6 @@ void addConcatenation() {
             }
         }
     }
-    for (int i = 0; i < lines.size(); ++i) {
-
-    }
-
-
 }
 
 void extractKeywords() {
@@ -209,36 +239,11 @@ void extractPunctuation() {
 }
 
 
-bool isOperator(char c) {
-    return (c == orSym.symbol || c == concatSym.symbol || c == closureSym.symbol || c == parenOpenSym.symbol
-            || c == parenCloseSym.symbol);
-}
-
-operatorSym selectOperator(char c) {
-    if (c == orSym.symbol) return orSym;
-    else if (c == concatSym.symbol) return concatSym;
-    else if (c == closureSym.symbol) return closureSym;
-    else if (c == parenOpenSym.symbol) return parenOpenSym;
-    else if (c == parenCloseSym.symbol) return parenCloseSym;
-}
-
-
-string makeString(queue<char> queue) {
-    stringstream ss;
-    string s;
-    while (queue.size() > 0) {
-        ss << queue.front();
-        queue.pop();
-    }
-    ss >> s;
-    return s;
-}
-
 void constructPostfix() {
-    stack<operatorSym> operators;
-    queue<char> operands;
 
     for (int i = 0; i < regExpressions.size(); ++i) {
+        stack<operatorSym> operators;
+        queue<char> operands;
 
         for (int j = 0; j < regExpressions[i].length(); ++j) {
 
@@ -273,33 +278,55 @@ void constructPostfix() {
         postfixExpressions.push_back(makeString(operands));
         cout << postfixExpressions[i] << endl;
     }
+
 }
+
+vector<State> graph;
+stack<Graph> wholeGraph;
+
+
 
 void evaluatePostfix(){
-
+    State start;
+    start.type = 0;
     for (int i = 0; i < postfixExpressions.size(); ++i) {
-//        stack<Graph>
+        for(int j = 0; j < postfixExpressions[i].length(); ++j){
+            if(isSymbol(postfixExpressions[i][j])){
+                State startState;
+                State intermediateState;
+                State acceptingState;
 
+                startState.type = 0;
+                intermediateState.type = 1;
+                acceptingState.type = 2;
 
+                startState.next[EPS].push_back(intermediateState);
+                intermediateState.next[transitionType[postfixExpressions[i][j]]].push_back(acceptingState);
+                //acceptingState.next
 
+                Graph singleStateGraph;
+                singleStateGraph.start = startState;
+                singleStateGraph.intermediate.push_back(intermediateState);
+                singleStateGraph.accepting = acceptingState;
 
-
-
+                wholeGraph.push(singleStateGraph);
+            }
+        }
 
 
     }
 }
 
 
-void identifyExp(vector<string> lines) {
+void orOperation(){
 
-    for (int i = 0; i < lines.size(); ++i) {
-        size_t found = lines[i].find(":");
-        if (found != std::string::npos) {
-            regExpressions.push_back(lines[i].substr(found+1,std::string::npos));
-            cout << regExpressions[regExpressions.size()-1] << endl;
-        }
-    }
+}
+
+void concatOperation(){
+
+}
+
+void closureOperation(){
 
 }
 
@@ -345,41 +372,3 @@ int main() {
     constructPostfix();
     return 0;
 }
-
-
-//int main() {
-//
-//    string line = "    letter = a-z | A-Z    ";
-//    trimAndSave(line);
-//    line =     "   digit = 0-9   ";
-//    trimAndSave(line);
-//    line = "   id: letter (letter | digit)* ";
-//    trimAndSave(line);
-//    line = "     digits = digit+   ";
-//    trimAndSave(line);
-//
-//
-//    identifyDefs();
-//    replaceDefs();
-//
-
-
-//    char line [80];
-//    FILE * pFile;
-//
-//    pFile = fopen ("/home/ahmed/Compiler_Phase1/rules.txt","r");
-//
-//
-//    while ( fgets ( line, sizeof line, pFile ) != NULL ) /* read a line */
-//    {
-//        fputs ( line, stdout ); /* write the line */
-//        string str2(line);
-//        trimAndSave(str2);
-//    }
-//    fclose ( pFile );
-//
-//
-//
-//
-//    return 0;
-//}

@@ -102,6 +102,9 @@
 		<Unit filename="/home/ahmed/Compiler_Phase1/Graph.h">
 			<Option target="cpp"/>
 		</Unit>
+		<Unit filename="/home/ahmed/Compiler_Phase1/State.h">
+			<Option target="cpp"/>
+		</Unit>
 		<Unit filename="/home/ahmed/Compiler_Phase1/main.cpp">
 			<Option target="cpp"/>
 		</Unit>
