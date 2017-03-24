@@ -150,33 +150,6 @@ Analyzer.cpp.s:
 	$(MAKE) -f CMakeFiles/cpp.dir/build.make CMakeFiles/cpp.dir/Analyzer.cpp.s
 .PHONY : Analyzer.cpp.s
 
-FileParser.o: FileParser.cpp.o
-
-.PHONY : FileParser.o
-
-# target to build an object file
-FileParser.cpp.o:
-	$(MAKE) -f CMakeFiles/cpp.dir/build.make CMakeFiles/cpp.dir/FileParser.cpp.o
-.PHONY : FileParser.cpp.o
-
-FileParser.i: FileParser.cpp.i
-
-.PHONY : FileParser.i
-
-# target to preprocess a source file
-FileParser.cpp.i:
-	$(MAKE) -f CMakeFiles/cpp.dir/build.make CMakeFiles/cpp.dir/FileParser.cpp.i
-.PHONY : FileParser.cpp.i
-
-FileParser.s: FileParser.cpp.s
-
-.PHONY : FileParser.s
-
-# target to generate assembly for a file
-FileParser.cpp.s:
-	$(MAKE) -f CMakeFiles/cpp.dir/build.make CMakeFiles/cpp.dir/FileParser.cpp.s
-.PHONY : FileParser.cpp.s
-
 Graph.o: Graph.cpp.o
 
 .PHONY : Graph.o
@@ -270,9 +243,6 @@ help:
 	@echo "... Analyzer.o"
 	@echo "... Analyzer.i"
 	@echo "... Analyzer.s"
-	@echo "... FileParser.o"
-	@echo "... FileParser.i"
-	@echo "... FileParser.s"
 	@echo "... Graph.o"
 	@echo "... Graph.i"
 	@echo "... Graph.s"
