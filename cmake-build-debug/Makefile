@@ -123,33 +123,6 @@ cpp/fast:
 	$(MAKE) -f CMakeFiles/cpp.dir/build.make CMakeFiles/cpp.dir/build
 .PHONY : cpp/fast
 
-Analyzer.o: Analyzer.cpp.o
-
-.PHONY : Analyzer.o
-
-# target to build an object file
-Analyzer.cpp.o:
-	$(MAKE) -f CMakeFiles/cpp.dir/build.make CMakeFiles/cpp.dir/Analyzer.cpp.o
-.PHONY : Analyzer.cpp.o
-
-Analyzer.i: Analyzer.cpp.i
-
-.PHONY : Analyzer.i
-
-# target to preprocess a source file
-Analyzer.cpp.i:
-	$(MAKE) -f CMakeFiles/cpp.dir/build.make CMakeFiles/cpp.dir/Analyzer.cpp.i
-.PHONY : Analyzer.cpp.i
-
-Analyzer.s: Analyzer.cpp.s
-
-.PHONY : Analyzer.s
-
-# target to generate assembly for a file
-Analyzer.cpp.s:
-	$(MAKE) -f CMakeFiles/cpp.dir/build.make CMakeFiles/cpp.dir/Analyzer.cpp.s
-.PHONY : Analyzer.cpp.s
-
 Graph.o: Graph.cpp.o
 
 .PHONY : Graph.o
@@ -240,9 +213,6 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... cpp"
-	@echo "... Analyzer.o"
-	@echo "... Analyzer.i"
-	@echo "... Analyzer.s"
 	@echo "... Graph.o"
 	@echo "... Graph.i"
 	@echo "... Graph.s"

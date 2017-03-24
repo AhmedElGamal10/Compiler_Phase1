@@ -22,8 +22,8 @@ public:
 
 
 vector<string> lines;
-vector<string> regExpressions;
-vector<string> postfixExpressions;
+vector<pair<string, string>> regExpressions;
+vector<pair<string, string>> postfixExpressions;
 
 vector<char> symbols;
 
@@ -158,7 +158,7 @@ void identifyDefs() {
             transitionType['a' + i] = LHS;
         }
     }
-
+    symbols.push_back('.');
 }
 
 void identifyExp(vector<string> lines) {
@@ -166,7 +166,7 @@ void identifyExp(vector<string> lines) {
     for (int i = 0; i < lines.size(); ++i) {
         size_t found = lines[i].find(":");
         if (found != std::string::npos) {
-            regExpressions.push_back(lines[i].substr(found + 1, std::string::npos));
+            regExpressions.push_back(make_pair(lines[i].substr(0, found), lines[i].substr(found + 1, std::string::npos)));
         }
     }
 
@@ -201,10 +201,21 @@ void addConcatenation() {
         }
 
         if (lines[i].find("E") != string::npos) {
-            tokenReplace(2, -1, lines[i], "E", "$");
+            tokenReplace(2, -1, lines[i], "E", "$~");
+        }
+
+        if (lines[i].find(".") != string::npos) {
+            tokenReplace(1,lines[i].find(".") , lines[i], ".", "~.");
+            cout << lines[i] << endl;
+        }
+
+        if (lines[i].find("\*") != string::npos) {
+            tokenReplace(1,lines[i].find("\*") , lines[i], "\*", "^");
+            cout << lines[i] << endl;
         }
 
         lines[i].erase(remove(lines[i].begin(), lines[i].end(), ' '), lines[i].end());
+        lines[i].erase(remove(lines[i].begin(), lines[i].end(), '\\'), lines[i].end());
 
         int startIndex = lines[i].find(":");
 
@@ -232,6 +243,7 @@ void addConcatenation() {
 }
 
 void extractKeywords() {
+
 }
 
 
@@ -246,9 +258,9 @@ void constructPostfix() {
         stack<operatorSym> operators;
         queue<char> operands;
 
-        for (int j = 0; j < regExpressions[i].length(); ++j) {
+        for (int j = 0; j < regExpressions[i].second.length(); ++j) {
 
-            char c = regExpressions[i][j];
+            char c = regExpressions[i].second[j];
 
             if (isOperator(c)) {
                 operatorSym tempOperator = selectOperator(c);
@@ -276,8 +288,8 @@ void constructPostfix() {
             operators.pop();
         }
 
-        postfixExpressions.push_back(makeString(operands));
-        cout << postfixExpressions[i] << endl;
+        postfixExpressions.push_back(make_pair(regExpressions[i].first,makeString(operands)));
+        cout << postfixExpressions[i].first << " " << postfixExpressions[i].second << endl;
     }
 
 }
@@ -379,39 +391,40 @@ void makeOperation(stack<Graph> &graphsStack, char &i) {
 }
 
 void evaluatePostfix() {
-
-    for (int i = 0; i < postfixExpressions.size(); ++i) {
-
-        for (int j = 0; j < postfixExpressions[i].length(); ++j) {
-            if (isSymbol(postfixExpressions[i][j])) {
-
-                Graph singleStateGraph(transitionType[regExpressions[i][j]]);
-                graphsStack.push(singleStateGraph);
-            } else if (isOperator(postfixExpressions[i][j])) {
-                makeOperation(graphsStack, postfixExpressions[i][j]);
-            }
-        }
-
-        //handling kleene closure for final biggest graph of postfix
-        if (graphsStack.size() == 1) {
-            Graph tempGraph = graphsStack.top();
-            graphsStack.pop();
-
-            if (tempGraph.closureApplied == true) {
-                Graph newGraph(tempGraph.start.onEntringEdge);
-                newGraph.start.next[EPS].push_back(tempGraph.start);
-                newGraph.start.next[EPS].push_back(tempGraph.accepting);
-
-                tempGraph = newGraph;
-            }
-            graphsStack.push(tempGraph);
-        }
+    cout << "**********************" << endl;
+    for(int i = 0; i < regExpressions.size(); i++){
+        cout << regExpressions[i].second << endl;
     }
+
+//    for (int i = 0; i < postfixExpressions.size(); ++i) {
+//
+//        for (int j = 0; j < postfixExpressions[i].length(); ++j) {
+//            if (isSymbol(postfixExpressions[i][j])) {
+//
+//                Graph singleStateGraph(transitionType[regExpressions[i][j]]);
+//                graphsStack.push(singleStateGraph);
+//            } else if (isOperator(postfixExpressions[i][j])) {
+//                makeOperation(graphsStack, postfixExpressions[i][j]);
+//            }
+//        }
+//
+//        //handling kleene closure for final biggest graph of postfix
+//        if (graphsStack.size() == 1) {
+//            Graph tempGraph = graphsStack.top();
+//            graphsStack.pop();
+//
+//            if (tempGraph.closureApplied == true) {
+//                Graph newGraph(tempGraph.start.onEntringEdge);
+//                newGraph.start.next[EPS].push_back(tempGraph.start);
+//                newGraph.start.next[EPS].push_back(tempGraph.accepting);
+//
+//                tempGraph = newGraph;
+//            }
+//            graphsStack.push(tempGraph);
+//        }
+//    }
 }
 
-Graph getNFAGraph(){
-    return graphsStack.top();
-}
 
 
 void parseFile() {

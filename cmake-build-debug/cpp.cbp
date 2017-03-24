@@ -84,12 +84,6 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/ahmed/Compiler_Phase1/Analyzer.cpp">
-			<Option target="cpp"/>
-		</Unit>
-		<Unit filename="/home/ahmed/Compiler_Phase1/Analyzer.h">
-			<Option target="cpp"/>
-		</Unit>
 		<Unit filename="/home/ahmed/Compiler_Phase1/Graph.cpp">
 			<Option target="cpp"/>
 		</Unit>
