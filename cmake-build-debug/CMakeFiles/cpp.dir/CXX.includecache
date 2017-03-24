@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ahmed/Compiler_Phase1/Analyzer.cpp
+Analyzer.h
+/home/ahmed/Compiler_Phase1/Analyzer.h
+
+/home/ahmed/Compiler_Phase1/Analyzer.h
+bits/stdc++.h
+/home/ahmed/Compiler_Phase1/bits/stdc++.h
+Graph.h
+/home/ahmed/Compiler_Phase1/Graph.h
+
+/home/ahmed/Compiler_Phase1/FileParser.cpp
+
+/home/ahmed/Compiler_Phase1/Graph.cpp
+Graph.h
+/home/ahmed/Compiler_Phase1/Graph.h
+
+/home/ahmed/Compiler_Phase1/Graph.h
+bits/stdc++.h
+/home/ahmed/Compiler_Phase1/bits/stdc++.h
+
+/home/ahmed/Compiler_Phase1/main.cpp
+bits/stdc++.h
+/home/ahmed/Compiler_Phase1/bits/stdc++.h
+Graph.h
+/home/ahmed/Compiler_Phase1/Graph.h
+
