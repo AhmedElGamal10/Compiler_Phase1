@@ -31,8 +31,6 @@ priority_queue<pair<string, vector<string>>, vector<pair<string, vector<string>>
 
 vector<State> states;
 map<char, string> transitionType;
-stack<Graph> graphsStack;
-
 
 void setupOperators() {
     orSym.symbol = '|';
@@ -48,10 +46,10 @@ void setupOperators() {
     posClosureSym.priority = 3;
 
     parenOpenSym.symbol = '(';
-    parenOpenSym.priority = 0;
+    parenOpenSym.priority = 4;
 
     parenCloseSym.symbol = ')';
-    parenCloseSym.priority = 0;
+    parenCloseSym.priority = 4;
 }
 
 
@@ -69,7 +67,7 @@ vector<string> parseRHS(string RHS, char symbol) {
 }
 
 bool isOperator(char c) {
-    return (c == orSym.symbol || c == concatSym.symbol || c == closureSym.symbol || c == parenOpenSym.symbol
+    return (c == orSym.symbol || c == concatSym.symbol || c == closureSym.symbol || c == posClosureSym.symbol || c == parenOpenSym.symbol
             || c == parenCloseSym.symbol);
 }
 
@@ -209,8 +207,8 @@ void addConcatenation() {
             cout << lines[i] << endl;
         }
 
-        if (lines[i].find("\*") != string::npos) {
-            tokenReplace(1,lines[i].find("\*") , lines[i], "\*", "^");
+        if (lines[i].find("\* |") != string::npos) {
+            tokenReplace(1,lines[i].find("\* |") , lines[i], "\* |", "^ |");
             cout << lines[i] << endl;
         }
 
@@ -264,8 +262,14 @@ void constructPostfix() {
 
             if (isOperator(c)) {
                 operatorSym tempOperator = selectOperator(c);
-                if (!operators.empty() && tempOperator.priority == operators.top().priority)
-                    operands.push(c);
+                if (!operators.empty() && tempOperator.priority < operators.top().priority) {
+                    operatorSym topOperator = operators.top();
+                    if(topOperator.symbol != '(' && topOperator.symbol != ')') {
+                        operands.push(topOperator.symbol);
+                        operators.pop();
+                    }
+                    operators.push(tempOperator);
+                }
                 else
                     operators.push(tempOperator);
             } else {
@@ -289,13 +293,15 @@ void constructPostfix() {
         }
 
         postfixExpressions.push_back(make_pair(regExpressions[i].first,makeString(operands)));
-        cout << postfixExpressions[i].first << " " << postfixExpressions[i].second << endl;
+        cout << postfixExpressions[i].first << " --- " << postfixExpressions[i].second << endl;
     }
 
 }
 
 Graph applyConcatenation(Graph graph1, Graph graph2) {
-    Graph newGraph(graph1.start.onEntringEdge);
+    Graph newGraph;
+
+    newGraph.start.onEntringEdge = graph1.start.onEntringEdge;
 
     graph1.accepting.type = 1;
     graph2.start.type = 1;
@@ -314,7 +320,9 @@ Graph applyConcatenation(Graph graph1, Graph graph2) {
 }
 
 Graph applyOr(Graph graph1, Graph graph2) {
-    Graph newGraph(EPS);
+    Graph newGraph;
+
+    newGraph.start.onEntringEdge = EPS;
 
     graph1.start.type = 1;
     graph2.start.type = 1;
@@ -376,11 +384,14 @@ void makeOperation(stack<Graph> &graphsStack, char &i) {
         //aab and I wanna concate a and b --> graph1: a, graph2: b
 
         //graph2: b
-        Graph tempGraph2 = graphsStack.top();
+        Graph tempGraph2;
+//        cout << "stack size" << graphsStack.size() << endl;
+        tempGraph2 = graphsStack.top();
         graphsStack.pop();
 
         //graph1: a
-        Graph tempGraph1 = graphsStack.top();
+        Graph tempGraph1;
+        tempGraph1 = graphsStack.top();
         graphsStack.pop();
 
         Graph resultGraph = applyConcatenation(tempGraph1, tempGraph2);
@@ -389,40 +400,57 @@ void makeOperation(stack<Graph> &graphsStack, char &i) {
 
 
 }
-
+vector<Graph> formedNFAs;
 void evaluatePostfix() {
     cout << "**********************" << endl;
-    for(int i = 0; i < regExpressions.size(); i++){
-        cout << regExpressions[i].second << endl;
+    for(int i = 0; i < postfixExpressions.size(); i++){
+        cout << postfixExpressions[i].second << endl;
     }
 
-//    for (int i = 0; i < postfixExpressions.size(); ++i) {
-//
-//        for (int j = 0; j < postfixExpressions[i].length(); ++j) {
-//            if (isSymbol(postfixExpressions[i][j])) {
-//
-//                Graph singleStateGraph(transitionType[regExpressions[i][j]]);
-//                graphsStack.push(singleStateGraph);
-//            } else if (isOperator(postfixExpressions[i][j])) {
-//                makeOperation(graphsStack, postfixExpressions[i][j]);
-//            }
-//        }
-//
-//        //handling kleene closure for final biggest graph of postfix
-//        if (graphsStack.size() == 1) {
-//            Graph tempGraph = graphsStack.top();
-//            graphsStack.pop();
-//
-//            if (tempGraph.closureApplied == true) {
-//                Graph newGraph(tempGraph.start.onEntringEdge);
-//                newGraph.start.next[EPS].push_back(tempGraph.start);
-//                newGraph.start.next[EPS].push_back(tempGraph.accepting);
-//
-//                tempGraph = newGraph;
-//            }
-//            graphsStack.push(tempGraph);
-//        }
-//    }
+    for (int i = 0; i < postfixExpressions.size(); ++i) {
+        cout << postfixExpressions[i].second << endl;
+
+        stack<Graph> graphsStack;
+        for (int j = 0; j < postfixExpressions[i].second.length(); ++j) {
+            char c = postfixExpressions[i].second[j];
+//            cout << c << endl;
+            if (isSymbol(postfixExpressions[i].second[j])) {
+                string type = transitionType[c];
+                Graph singleStateGraph;
+                singleStateGraph.start.onEntringEdge = type;
+                graphsStack.push(singleStateGraph);
+//                cout << "stack size" << " " << graphsStack.size() << endl;
+            } else if (isOperator(postfixExpressions[i].second[j])) {
+                makeOperation(graphsStack, postfixExpressions[i].second[j]);
+            }
+
+        }
+
+        //handling kleene closure for final biggest graph of postfix
+        if (graphsStack.size() == 1) {
+            Graph tempGraph = graphsStack.top();
+            graphsStack.pop();
+
+            if (tempGraph.closureApplied == true) {
+                Graph newGraph;
+                newGraph.start.onEntringEdge = tempGraph.start.onEntringEdge;
+
+                newGraph.start.next[EPS].push_back(tempGraph.start);
+                newGraph.start.next[EPS].push_back(tempGraph.accepting);
+
+                tempGraph = newGraph;
+            }
+            graphsStack.push(tempGraph);
+        }
+        Graph temp = graphsStack.top();
+        graphsStack.pop();
+        temp.accepting.definition = postfixExpressions[i].first;
+        graphsStack.push(temp);
+
+//        cout << graphsStack.size() << endl;
+        Graph formedNFA = graphsStack.top();
+        formedNFAs.push_back(formedNFA);
+    }
 }
 
 

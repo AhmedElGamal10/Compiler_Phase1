@@ -3,10 +3,12 @@
 
 CMakeFiles/cpp.dir/Graph.cpp.o: ../Graph.cpp
 CMakeFiles/cpp.dir/Graph.cpp.o: ../Graph.h
+CMakeFiles/cpp.dir/Graph.cpp.o: ../State.h
 
 CMakeFiles/cpp.dir/State.cpp.o: ../State.cpp
 CMakeFiles/cpp.dir/State.cpp.o: ../State.h
 
 CMakeFiles/cpp.dir/main.cpp.o: ../Graph.h
+CMakeFiles/cpp.dir/main.cpp.o: ../State.h
 CMakeFiles/cpp.dir/main.cpp.o: ../main.cpp
 

@@ -5,7 +5,7 @@
 #include "Graph.h"
 
 
-Graph::Graph(string transitionType) {
+Graph::Graph() {
     start.type = 0;
     accepting.type = 2;
 
@@ -17,7 +17,7 @@ Graph::Graph(string transitionType) {
     intermediateState.next[EPS].push_back(accepting);
     start.next[EPS].push_back(intermediateState);
 
-    start.onEntringEdge = transitionType;
+    start.onEntringEdge;
 
     intermediate.push_back(intermediateState);
 }

@@ -10,8 +10,7 @@ const string EPS = "#";
 
 class Graph {
 public:
-
-    Graph(string transitionType);
+    Graph();
 
     bool closureApplied;
     State start;
