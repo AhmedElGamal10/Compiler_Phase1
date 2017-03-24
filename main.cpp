@@ -4,14 +4,14 @@
 
 #include "bits/stdc++.h"
 #include "Graph.h"
-#include "State.h"
 
 using namespace std;
 
 struct operatorSym {
     char symbol;
     int priority;
-}orSym, concatSym, closureSym, parenOpenSym, parenCloseSym;
+} orSym, concatSym, closureSym, posClosureSym, parenOpenSym, parenCloseSym;
+
 
 class compare {
 public:
@@ -32,7 +32,9 @@ vector<char> symbols;
 priority_queue<pair<string, vector<string>>, vector<pair<string, vector<string>>>, compare> pq;
 
 vector<State> states;
-map <char, string> transitionType;
+map<char, string> transitionType;
+stack<Graph> graphsStack;
+
 
 void setupOperators() {
     orSym.symbol = '|';
@@ -43,6 +45,9 @@ void setupOperators() {
 
     closureSym.symbol = '*';
     closureSym.priority = 3;
+
+    posClosureSym.symbol = '+';
+    posClosureSym.priority = 3;
 
     parenOpenSym.symbol = '(';
     parenOpenSym.priority = 0;
@@ -78,6 +83,7 @@ operatorSym selectOperator(char c) {
     if (c == orSym.symbol) return orSym;
     else if (c == concatSym.symbol) return concatSym;
     else if (c == closureSym.symbol) return closureSym;
+    else if (c == posClosureSym.symbol) return posClosureSym;
     else if (c == parenOpenSym.symbol) return parenOpenSym;
     else if (c == parenCloseSym.symbol) return parenCloseSym;
 }
@@ -123,7 +129,6 @@ bool tokenReplace(int type, int pointer, string &line, string originalDef, strin
 }
 
 
-
 //*******************************************************************************************
 void trimAndSave(string &line) {
 
@@ -163,8 +168,7 @@ void identifyExp(vector<string> lines) {
     for (int i = 0; i < lines.size(); ++i) {
         size_t found = lines[i].find(":");
         if (found != std::string::npos) {
-            regExpressions.push_back(lines[i].substr(found+1,std::string::npos));
-//            cout << regExpressions[regExpressions.size()-1] << endl;
+            regExpressions.push_back(lines[i].substr(found + 1, std::string::npos));
         }
     }
 
@@ -189,7 +193,6 @@ void replaceDefs() {
         }
     }
 }
-
 
 
 void addConcatenation() {
@@ -259,11 +262,11 @@ void constructPostfix() {
                 operands.push(c);
             }
 
-            if (c == ')'){
+            if (c == ')') {
                 operators.pop();
                 while (operators.top().symbol != parenOpenSym.symbol) {
                     char temp = operators.top().symbol;
-                    if(temp != parenOpenSym.symbol)
+                    if (temp != parenOpenSym.symbol)
                         operands.push(temp);
                     operators.pop();
                 }
@@ -281,52 +284,70 @@ void constructPostfix() {
 
 }
 
-vector<State> graph;
-stack<Graph> graphsStack;
-
-
 Graph applyConcatenation(Graph graph1, Graph graph2) {
+    Graph newGraph;
+
     graph1.accepting.type = 1;
     graph2.start.type = 1;
 
     graph1.accepting.next[graph2.start.onEntringEdge].push_back(graph2.start);
 
     //handle kleene closure
-    if(graph2.closureApplied == true){
+    if (graph2.closureApplied == true) {
         graph1.accepting.next[EPS].push_back(graph2.accepting);
     }
 
+    newGraph.start.next[EPS].push_back(graph1.start);
+    graph2.accepting.next[EPS].push_back(newGraph.accepting);
+
+    return newGraph;
 }
 
-Graph applyOr(Graph graph1, Graph graph2){
+Graph applyOr(Graph graph1, Graph graph2) {
+    Graph newGraph;
 
+    newGraph.start.next[EPS].push_back(graph1.start);
+    newGraph.start.next[EPS].push_back(graph2.start);
 
-
-
+    graph1.accepting.next[EPS].push_back(newGraph.accepting);
+    graph2.accepting.next[EPS].push_back(newGraph.accepting);
 }
 
-void applyKleeneClosure(Graph &tempGraph){
+void applyKleeneClosure(Graph &tempGraph) {
 
     tempGraph.closureApplied = true;
-
     tempGraph.accepting.next[EPS].push_back(tempGraph.start);
 }
 
-void applyPositiveClosure(Graph &tempGraph){
+void applyPositiveClosure(Graph &tempGraph) {
     tempGraph.accepting.next[EPS].push_back(tempGraph.start);
 }
 
 
 void makeOperation(stack<Graph> &graphsStack, char &i) {
 
-    if(i == '*'){
+    if (i == '*') {
         Graph tempGraph = graphsStack.top();
         graphsStack.pop();
         applyKleeneClosure(tempGraph);
         graphsStack.push(tempGraph);
-    }else if(i == '|'){
-        applyOr();
-    }else if(i == '~'){
+    } else if (i == '+') {
+        Graph tempGraph = graphsStack.top();
+        graphsStack.pop();
+        applyPositiveClosure(tempGraph);
+        graphsStack.push(tempGraph);
+    } else if (i == '|') {
+        Graph tempGraph1 = graphsStack.top();
+        graphsStack.pop();
+
+        Graph tempGraph2 = graphsStack.top();
+        graphsStack.pop();
+
+
+        Graph newGraph = applyOr(tempGraph1, tempGraph2);
+        graphsStack.push(newGraph);
+
+    } else if (i == '~') {
         //aab and I wanna concate a and b --> graph1: a, graph2: b
 
         //graph2: b
@@ -339,21 +360,17 @@ void makeOperation(stack<Graph> &graphsStack, char &i) {
 
         Graph resultGraph = applyConcatenation(tempGraph1, tempGraph2);
         graphsStack.push(resultGraph);
-    }else if(i == '+'){
-        Graph tempGraph = graphsStack.top();
-        graphsStack.pop();
-        applyPositiveClosure(tempGraph);
     }
-
 
 
 }
 
-void evaluatePostfix(){
+void evaluatePostfix() {
 
     for (int i = 0; i < postfixExpressions.size(); ++i) {
-        for(int j = 0; j < postfixExpressions[i].length(); ++j){
-            if(isSymbol(postfixExpressions[i][j])){
+
+        for (int j = 0; j < postfixExpressions[i].length(); ++j) {
+            if (isSymbol(postfixExpressions[i][j])) {
                 State startState;
                 State intermediateState;
                 State acceptingState;
@@ -372,13 +389,25 @@ void evaluatePostfix(){
                 singleStateGraph.accepting = acceptingState;
 
                 graphsStack.push(singleStateGraph);
-            }
-            else if(isOperator(postfixExpressions[i][j])){
+            } else if (isOperator(postfixExpressions[i][j])) {
                 makeOperation(graphsStack, postfixExpressions[i][j]);
             }
         }
 
+        //handling kleene closure for final biggest graph of postfix
+        if (graphsStack.size() == 1) {
+            Graph tempGraph = graphsStack.top();
+            graphsStack.pop();
 
+            if (tempGraph.closureApplied == true) {
+                Graph newGraph;
+                newGraph.start.next[EPS].push_back(tempGraph.start);
+                newGraph.start.next[EPS].push_back(tempGraph.accepting);
+
+                tempGraph = newGraph;
+            }
+            graphsStack.push(tempGraph);
+        }
     }
 }
 
