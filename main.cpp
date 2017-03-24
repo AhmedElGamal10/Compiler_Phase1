@@ -21,8 +21,6 @@ public:
 };
 
 
-const string EPS = "#";
-
 vector<string> lines;
 vector<string> regExpressions;
 vector<string> postfixExpressions;
@@ -285,7 +283,7 @@ void constructPostfix() {
 }
 
 Graph applyConcatenation(Graph graph1, Graph graph2) {
-    Graph newGraph;
+    Graph newGraph(graph1.start.onEntringEdge);
 
     graph1.accepting.type = 1;
     graph2.start.type = 1;
@@ -304,7 +302,7 @@ Graph applyConcatenation(Graph graph1, Graph graph2) {
 }
 
 Graph applyOr(Graph graph1, Graph graph2) {
-    Graph newGraph;
+    Graph newGraph(EPS);
 
     graph1.start.type = 1;
     graph2.start.type = 1;
@@ -386,23 +384,8 @@ void evaluatePostfix() {
 
         for (int j = 0; j < postfixExpressions[i].length(); ++j) {
             if (isSymbol(postfixExpressions[i][j])) {
-                State startState;
-                State intermediateState;
-                State acceptingState;
 
-                startState.type = 0;
-                intermediateState.type = 1;
-                acceptingState.type = 2;
-
-                startState.onEntringEdge = transitionType[regExpressions[i][j]];
-                intermediateState.onEntringEdge = EPS;
-                acceptingState.onEntringEdge = EPS;
-
-                Graph singleStateGraph;
-                singleStateGraph.start = startState;
-                singleStateGraph.intermediate.push_back(intermediateState);
-                singleStateGraph.accepting = acceptingState;
-
+                Graph singleStateGraph(transitionType[regExpressions[i][j]]);
                 graphsStack.push(singleStateGraph);
             } else if (isOperator(postfixExpressions[i][j])) {
                 makeOperation(graphsStack, postfixExpressions[i][j]);
@@ -415,7 +398,7 @@ void evaluatePostfix() {
             graphsStack.pop();
 
             if (tempGraph.closureApplied == true) {
-                Graph newGraph;
+                Graph newGraph(tempGraph.start.onEntringEdge);
                 newGraph.start.next[EPS].push_back(tempGraph.start);
                 newGraph.start.next[EPS].push_back(tempGraph.accepting);
 
@@ -465,6 +448,9 @@ int main() {
     replaceDefs();
     addConcatenation();
     identifyExp(lines);
+
     constructPostfix();
+    evaluatePostfix();
+
     return 0;
 }

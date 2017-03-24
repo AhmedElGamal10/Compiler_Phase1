@@ -3,15 +3,19 @@
 //
 #include "bits/stdc++.h"
 #include "State.h"
+
 #ifndef CPP_GRAPH_H
 #define CPP_GRAPH_H
+const string EPS = "#";
 
 class Graph {
 public:
-    Graph();
+
+    Graph(string transitionType);
+
     bool closureApplied;
     State start;
-    vector <State> intermediate;
+    vector<State> intermediate;
     State accepting;
 };
 
