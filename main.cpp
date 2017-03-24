@@ -286,19 +286,34 @@ stack<Graph> graphsStack;
 
 
 Graph applyConcatenation(Graph graph1, Graph graph2) {
-    graph1.accepting.next[] = graph2.start;
+    graph1.accepting.type = 1;
+    graph2.start.type = 1;
+
+    graph1.accepting.next[graph2.start.onEntringEdge].push_back(graph2.start);
+
+    //handle kleene closure
+    if(graph2.closureApplied == true){
+        graph1.accepting.next[EPS].push_back(graph2.accepting);
+    }
+
 }
 
-void applyOr(){
+Graph applyOr(Graph graph1, Graph graph2){
+
+
+
 
 }
 
 void applyKleeneClosure(Graph &tempGraph){
 
+    tempGraph.closureApplied = true;
+
+    tempGraph.accepting.next[EPS].push_back(tempGraph.start);
 }
 
 void applyPositiveClosure(Graph &tempGraph){
-
+    tempGraph.accepting.next[EPS].push_back(tempGraph.start);
 }
 
 
@@ -347,9 +362,9 @@ void evaluatePostfix(){
                 intermediateState.type = 1;
                 acceptingState.type = 2;
 
-                startState.next[EPS].push_back(intermediateState);
-                intermediateState.next[EPS].push_back(acceptingState);
-                //acceptingState.next[transitionType[postfixExpressions[i][j]]];
+                startState.onEntringEdge = transitionType[regExpressions[i][j]];
+                intermediateState.onEntringEdge = EPS;
+                acceptingState.onEntringEdge = EPS;
 
                 Graph singleStateGraph;
                 singleStateGraph.start = startState;

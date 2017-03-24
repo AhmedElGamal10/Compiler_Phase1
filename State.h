@@ -7,16 +7,19 @@
 
 #include <vector>
 #include <map>
-#include "bits/stdc++.h
+#include "bits/stdc++.h"
 #include "iostream"
 
 using namespace std;
 
 class State {
+
 public:
+    State();
     int type;   //0 -> start    1->intermediate     2-accepting
-    string forTransition;   //"letter"  "digit"     "digits"
+    string onEntringEdge;   //"letter"  "digit"     "digits"
     map<string, vector<State>> next;
+//    bool closureApplied;
 };
 
 #endif //CPP_STATE_H

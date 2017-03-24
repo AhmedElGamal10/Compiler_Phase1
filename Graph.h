@@ -8,6 +8,8 @@
 
 class Graph {
 public:
+    Graph();
+    bool closureApplied;
     State start;
     vector <State> intermediate;
     State accepting;
