@@ -371,66 +371,87 @@ State addAccepting() {
 }
 
 void makeOperation(stack<pair<State, State>> &graphsStack, char &i) {
+
+    //dummy is to differ graph from single state
+    
+    /* grab graph 1 form stack*/
     pair<State, State> graph1;
     graph1 = graphsStack.top();
     graphsStack.pop();
 
+    /*start and accepting for graph 1*/
     State start1 = graph1.first;
     State end1 = graph1.second;
-
+    
+    /* newly added terminals*/  
     State start = addStart();
-    State end = addAccepting();
+    State accepting = addAccepting();
 
     char EPS = '#';
 
     if (i == '*') {
 
+        /* if single state*/
         if (end1.is_dummy_state()) {
             start.add_to_table(EPS, start1);
             start1.add_to_table(EPS, start);
-            start.add_to_table(EPS, end);
+            start.add_to_table(EPS, accepting);
             return;
         }
-        start.add_to_table(EPS, end);
+
+        /* if full graph*/
+        start.add_to_table(EPS, accepting);
         start.add_to_table(EPS, start1);
 
         start1.add_to_table(EPS, start);
-        end1.add_to_table(EPS, end);
+        end1.add_to_table(EPS, accepting);
 
     } else if (i == '+') {
+
+        /* if single state*/
         if (end1.is_dummy_state()) {
             start.add_to_table(EPS, start1);
             start1.add_to_table(EPS, start);
-            start.add_to_table(EPS, end);
+            start.add_to_table(EPS, accepting);
             return;
         }
-        //start.add_to_table(EPS, end);
+
+        /* if full graph*/
+
+        //start.add_to_table(EPS, accepting);
         start.add_to_table(EPS, start1);
 
         start1.add_to_table(EPS, start);
-        end1.add_to_table(EPS, end);
+        end1.add_to_table(EPS, accepting);
 
     } else if (i == '|') {
 
+        /*grab graph 2 form stack*/
         pair<State, State> graph2;
         graph2 = graphsStack.top();
         graphsStack.pop();
 
+        /*start and accepting for graph 2*/
         State start2 = graph2.first;
         State end2 = graph2.second;
 
+        /*construct OR graph*/
         start.add_to_table(EPS, start1);
         start.add_to_table(EPS, start2);
 
-        end1.add_to_table(EPS, end);
-        end2.add_to_table(EPS, end);
-
+        /* graph 1 is single state */
         if (end1.is_dummy_state()) {
-
+            start1.add_to_table(EPS, accepting);
+        }else {
+            end1.add_to_table(EPS, accepting);
         }
 
-        if (end2.is_dummy_state()) {
 
+        /* graph 2 is single state */
+        if (end2.is_dummy_state()) {
+            start1.add_to_table(EPS, accepting);
+        }else{
+            end2.add_to_table(EPS, accepting);
         }
 
     } else if (i == '~') {
@@ -442,14 +463,20 @@ void makeOperation(stack<pair<State, State>> &graphsStack, char &i) {
         State start2 = graph2.first;
         State end2 = graph2.second;
 
-        end1.add_to_table(EPS, start2);
 
+
+        /*if graph 1 is single state*/
         if (end1.is_dummy_state()) {
-
+            start1.add_to_table(EPS, start2);
+        }else{
+            end1.add_to_table(EPS, start2);
         }
 
-        if (end2.is_dummy_state()) {
-
+        /*if graph 2 is single state*/
+        if (end2.is_dummy_state()){
+            start2.add_to_table(EPS, end);
+        }else{
+            end2.add_to_table(EPS, end);
         }
 
     }
