@@ -12,10 +12,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e0f8ca01-0122-41d4-98f9-cbb0b05ee855" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Graph.cpp" afterPath="$PROJECT_DIR$/Graph.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Graph.h" afterPath="$PROJECT_DIR$/Graph.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/State.cpp" afterPath="$PROJECT_DIR$/State.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/State.h" afterPath="$PROJECT_DIR$/State.h" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.cpp" afterPath="$PROJECT_DIR$/main.cpp" />
     </list>
     <ignored path="Compiler_Phase1.iws" />
@@ -41,7 +37,7 @@
         <entry file="file://$PROJECT_DIR$/main.cpp">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="246">
-              <caret line="445" column="0" lean-forward="true" selection-start-line="445" selection-start-column="0" selection-end-line="445" selection-end-column="0" />
+              <caret line="451" column="12" lean-forward="false" selection-start-line="451" selection-start-column="12" selection-end-line="451" selection-end-column="12" />
               <folding />
             </state>
           </provider>
@@ -412,12 +408,12 @@
       <workItem from="1490358311095" duration="682000" />
       <workItem from="1490366804731" duration="1947000" />
       <workItem from="1490368851851" duration="6172000" />
-      <workItem from="1490523170600" duration="7546000" />
+      <workItem from="1490523170600" duration="8031000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="54061000" />
+    <option name="totallyTimeSpent" value="54546000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="55" y="24" width="1311" height="744" extended-state="6" />
@@ -765,7 +761,7 @@
     <entry file="file://$PROJECT_DIR$/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="246">
-          <caret line="445" column="0" lean-forward="true" selection-start-line="445" selection-start-column="0" selection-end-line="445" selection-end-column="0" />
+          <caret line="451" column="12" lean-forward="false" selection-start-line="451" selection-start-column="12" selection-end-line="451" selection-end-column="12" />
           <folding />
         </state>
       </provider>
