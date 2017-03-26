@@ -12,9 +12,10 @@ class Graph {
 public:
     Graph();
 
+    Graph(State start, State accepting);
+
     bool closureApplied;
     State start;
-    vector<State> intermediate;
     State accepting;
 };
 

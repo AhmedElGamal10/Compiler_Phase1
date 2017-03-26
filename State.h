@@ -1,26 +1,59 @@
-//
-// Created by ahmed on 24/03/17.
-//
+#ifndef STATE_H
+#define STATE_H
 
-#ifndef CPP_STATE_H
-#define CPP_STATE_H
-
+#include <string>
 #include <vector>
 #include <map>
-#include "bits/stdc++.h"
-#include "iostream"
+#include <set>
 
 using namespace std;
 
-class State {
+class State
+{
+    public:
+        State();
+        State(bool,string,map<char , vector<State*> >);
+        State(bool);
+        State(bool, bool);
 
-public:
-    State();
-    int type;   //0 -> start    1->intermediate     2-accepting
-    string onEntringEdge;   //"letter"  "digit"     "digits"
-    string definition;
-    map<string, vector<State>> next;
-//    bool closureApplied;
+        virtual ~State();
+
+
+    /*Setter & getter*/
+    void set_id(int);
+    void set_name(string);
+    void set_is_accepted(bool);
+    void set_start();
+
+    int get_id();
+    string get_name();
+    bool is_accept();
+    bool is_dummy_state();
+    bool is_start_start();
+
+    /*add next state can be reached form this state on input*/
+    void add_to_table(char input, State* next);
+
+    /*get all next state that reached by this state on input*/
+    vector<State*> get_next_state(char input);
+
+    /*print all transtion it table*/
+    void print(void);
+
+    protected:
+
+    private:
+
+    /*attributes*/
+
+    bool is_accepted;                       /*if this state is acceptes*/
+    bool is_dummy;
+    bool is_start;
+
+    string name;                            /* state name use to know type*/
+    int id;                                 /*state id auto generate*/
+    map<char , vector<State*> > table;       /*transition table of state*/
+
 };
 
-#endif //CPP_STATE_H
+#endif // STATE_H

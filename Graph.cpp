@@ -5,19 +5,7 @@
 #include "Graph.h"
 
 
-Graph::Graph() {
-    start.type = 0;
-    accepting.type = 2;
-
-    closureApplied = false;
-
-    State intermediateState;
-    intermediateState.type = 1;
-
-    intermediateState.next[EPS].push_back(accepting);
-    start.next[EPS].push_back(intermediateState);
-
-    start.onEntringEdge;
-
-    intermediate.push_back(intermediateState);
+Graph::Graph(State start, State accepting){
+    this->start = start;
+    this->accepting = accepting;
 }

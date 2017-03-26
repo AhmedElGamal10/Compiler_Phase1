@@ -277,7 +277,6 @@ void extractKeywords() {
 
 }
 
-
 void extractPunctuation() {
     for (int i = 0; i < lines.size(); ++i) {
         vector<string> puncTokens;
@@ -342,174 +341,175 @@ void constructPostfix() {
 }
 
 Graph applyConcatenation(Graph graph1, Graph graph2) {
-    Graph newGraph;
 
-    newGraph.start.onEntringEdge = graph1.start.onEntringEdge;
-
-    graph1.accepting.type = 1;
-    graph2.start.type = 1;
-
-    graph1.accepting.next[graph2.start.onEntringEdge].push_back(graph2.start);
-
-    //handle kleene closure
-    if (graph2.closureApplied == true) {
-        graph1.accepting.next[EPS].push_back(graph2.accepting);
-    }
-
-    newGraph.start.next[EPS].push_back(graph1.start);
-    graph2.accepting.next[EPS].push_back(newGraph.accepting);
-
-    return newGraph;
 }
 
 Graph applyOr(Graph graph1, Graph graph2) {
-    Graph newGraph;
 
-    newGraph.start.onEntringEdge = EPS;
-
-    graph1.start.type = 1;
-    graph2.start.type = 1;
-
-    graph1.accepting.type = 1;
-    graph2.accepting.type = 1;
-
-    newGraph.start.next[EPS].push_back(graph1.start);
-    newGraph.start.next[EPS].push_back(graph2.start);
-
-    if (graph1.closureApplied)
-        newGraph.start.next[EPS].push_back(graph1.accepting);
-
-    if (graph2.closureApplied)
-        newGraph.start.next[EPS].push_back(graph2.accepting);
-
-
-    graph1.accepting.next[EPS].push_back(newGraph.accepting);
-    graph2.accepting.next[EPS].push_back(newGraph.accepting);
-
-    return newGraph;
 }
 
 void applyKleeneClosure(Graph &tempGraph) {
 
-    tempGraph.closureApplied = true;
-    tempGraph.accepting.next[EPS].push_back(tempGraph.start);
 }
 
 void applyPositiveClosure(Graph &tempGraph) {
-    tempGraph.accepting.next[EPS].push_back(tempGraph.start);
+
 }
 
 
-void makeOperation(stack<Graph> &graphsStack, char &i) {
+State addStart() {
+    State start(false);
+    start.set_start();
+
+    return start;
+}
+
+State addAccepting() {
+    State accepting(true);
+
+    return accepting;
+}
+
+void makeOperation(stack<pair<State, State>> &graphsStack, char &i) {
+    pair<State, State> graph1;
+    graph1 = graphsStack.top();
+    graphsStack.pop();
+
+    State start1 = graph1.first;
+    State end1 = graph1.second;
+
+    State start = addStart();
+    State end = addAccepting();
+
+    char EPS = '#';
 
     if (i == '*') {
-        Graph tempGraph = graphsStack.top();
-        graphsStack.pop();
-        applyKleeneClosure(tempGraph);
-        graphsStack.push(tempGraph);
+
+        if (end1.is_dummy_state()) {
+            start.add_to_table(EPS, start1);
+            start1.add_to_table(EPS, start);
+            start.add_to_table(EPS, end);
+            return;
+        }
+        start.add_to_table(EPS, end);
+        start.add_to_table(EPS, start1);
+
+        start1.add_to_table(EPS, start);
+        end1.add_to_table(EPS, end);
+
     } else if (i == '+') {
-        Graph tempGraph = graphsStack.top();
-        graphsStack.pop();
-        applyPositiveClosure(tempGraph);
-        graphsStack.push(tempGraph);
+        if (end1.is_dummy_state()) {
+            start.add_to_table(EPS, start1);
+            start1.add_to_table(EPS, start);
+            start.add_to_table(EPS, end);
+            return;
+        }
+        //start.add_to_table(EPS, end);
+        start.add_to_table(EPS, start1);
+
+        start1.add_to_table(EPS, start);
+        end1.add_to_table(EPS, end);
+
     } else if (i == '|') {
-        Graph tempGraph1 = graphsStack.top();
+
+        pair<State, State> graph2;
+        graph2 = graphsStack.top();
         graphsStack.pop();
 
-        Graph tempGraph2 = graphsStack.top();
-        graphsStack.pop();
+        State start2 = graph2.first;
+        State end2 = graph2.second;
 
+        start.add_to_table(EPS, start1);
+        start.add_to_table(EPS, start2);
 
-        Graph newGraph = applyOr(tempGraph1, tempGraph2);
-        graphsStack.push(newGraph);
+        end1.add_to_table(EPS, end);
+        end2.add_to_table(EPS, end);
+
+        if (end1.is_dummy_state()) {
+
+        }
+
+        if (end2.is_dummy_state()) {
+
+        }
 
     } else if (i == '~') {
-        //aab and I wanna concate a and b --> graph1: a, graph2: b
 
-        //graph2: b
-        Graph tempGraph2;
-//        cout << "stack size" << graphsStack.size() << endl;
-        tempGraph2 = graphsStack.top();
+        pair<State, State> graph2;
+        graph2 = graphsStack.top();
         graphsStack.pop();
 
-        //graph1: a
-        Graph tempGraph1;
-        tempGraph1 = graphsStack.top();
-        graphsStack.pop();
+        State start2 = graph2.first;
+        State end2 = graph2.second;
 
-        Graph resultGraph = applyConcatenation(tempGraph1, tempGraph2);
-        graphsStack.push(resultGraph);
+        end1.add_to_table(EPS, start2);
+
+        if (end1.is_dummy_state()) {
+
+        }
+
+        if (end2.is_dummy_state()) {
+
+        }
+
+    }
+
+}
+
+void evaluatePostfix() {
+//    cout << "**********************" << endl;
+    for (int i = 0; i < postfixExpressions.size(); i++) {
+        cout << postfixExpressions[i].second << endl;
     }
 
 
-}
+    for (int i = 0; i < postfixExpressions.size(); ++i) {
+        cout << postfixExpressions[i].second << endl;
 
-vector<Graph> formedNFAs;
+        stack<pair<State, State>> graphsStack;
+        for (int j = 0; j < postfixExpressions[i].second.length(); ++j) {
 
-//Graph construct(string LHS) {
-//    Graph newGraph;
-//    State s1 = ;
-//
-//
-//}
+            char c = postfixExpressions[i].second[j];
+//            cout << c << endl;
+            if (isSymbol(postfixExpressions[i].second[j])) {
+                string type = transitionType[c];
+                State state1(false);
+                State dummy(false, true);
+                graphsStack.push(make_pair(state1, dummy));
 
-//void evaluatePostfix() {
-//    cout << "**********************" << endl;
-//    for (int i = 0; i < postfixExpressions.size(); i++) {
-//        cout << postfixExpressions[i].second << endl;
-//    }
-//
-//    for (int i = 0; i < postfixExpressions.size(); ++i) {
-//        cout << postfixExpressions[i].second << endl;
-//
-//        stack<Graph> graphsStack;
-//        if (!postfixExpressions[i].first.compare(LOGICAL)){
-//            formedNFAs.push_back(construct(LOGICAL));
-//        }
-//        else {
-//            for (int j = 0; j < postfixExpressions[i].second.length(); ++j) {
-//                char c = postfixExpressions[i].second[j];
-////            cout << c << endl;
-//                if (isSymbol(postfixExpressions[i].second[j])) {
-//                    string type = transitionType[c];
-//                    Graph singleStateGraph;
-//                    singleStateGraph.start.onEntringEdge = type;
-//                    graphsStack.push(singleStateGraph);
-////                cout << "stack size" << " " << graphsStack.size() << endl;
-//                } else if (isOperator(postfixExpressions[i].second[j])) {
-//                    makeOperation(graphsStack, postfixExpressions[i].second[j]);
-//                }
-//
-//            }
-//
-//            //handling kleene closure for final biggest graph of postfix
-//            if (graphsStack.size() == 1) {
-//                Graph tempGraph = graphsStack.top();
-//                graphsStack.pop();
-//
-//                if (tempGraph.closureApplied == true) {
-//                    Graph newGraph;
-//                    newGraph.start.onEntringEdge = tempGraph.start.onEntringEdge;
-//
-//                    newGraph.start.next[EPS].push_back(tempGraph.start);
-//                    newGraph.start.next[EPS].push_back(tempGraph.accepting);
-//
-//                    tempGraph = newGraph;
-//                }
-//                graphsStack.push(tempGraph);
-//            }
-//
+            } else if (isOperator(postfixExpressions[i].second[j])) {
+                makeOperation(graphsStack, postfixExpressions[i].second[j]);
+            }
+
+        }
+
+        //handling kleene closure for final biggest graph of postfix
+        if (graphsStack.size() == 1) {
+            Graph tempGraph = graphsStack.top();
+            graphsStack.pop();
+
+            if (tempGraph.closureApplied == true) {
+                Graph newGraph;
+                newGraph.start.onEntringEdge = tempGraph.start.onEntringEdge;
+
+                newGraph.start.next[EPS].push_back(tempGraph.start);
+                newGraph.start.next[EPS].push_back(tempGraph.accepting);
+
+                tempGraph = newGraph;
+            }
+            graphsStack.push(tempGraph);
+        }
+
 //            Graph temp = graphsStack.top();
 //            graphsStack.pop();
 //            temp.accepting.definition = postfixExpressions[i].first;
 //            graphsStack.push(temp);
 //
-////        cout << graphsStack.size() << endl;
+//        cout << graphsStack.size() << endl;
 //            Graph formedNFA = graphsStack.top();
 //            formedNFAs.push_back(formedNFA);
-//        }
-//    }
-//}
+    }
+}
 
 
 void parseFile() {
