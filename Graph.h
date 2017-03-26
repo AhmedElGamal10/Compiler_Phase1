@@ -7,7 +7,7 @@
 #ifndef CPP_GRAPH_H
 #define CPP_GRAPH_H
 const string EPS = "#";
-
+const string LOGICAL = "relop";
 class Graph {
 public:
     Graph();
