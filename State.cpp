@@ -31,6 +31,7 @@ bool State::is_start_start() {
 }
 
 State::State(bool is_accepted, bool is_dummy) {
+    this->is_accepted = is_accepted;
     this->is_dummy = is_dummy;
 }
 

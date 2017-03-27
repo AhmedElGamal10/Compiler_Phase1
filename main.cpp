@@ -33,6 +33,8 @@ vector<char> symbols;
 priority_queue<pair<string, vector<string>>, vector<pair<string, vector<string>>>, compare> pq;
 
 vector<State> states;
+vector<pair<State, State>> allGraphs;
+
 map<char, string> transitionType;
 
 void setupOperators() {
@@ -340,23 +342,6 @@ void constructPostfix() {
 
 }
 
-Graph applyConcatenation(Graph graph1, Graph graph2) {
-
-}
-
-Graph applyOr(Graph graph1, Graph graph2) {
-
-}
-
-void applyKleeneClosure(Graph &tempGraph) {
-
-}
-
-void applyPositiveClosure(Graph &tempGraph) {
-
-}
-
-
 State addStart() {
     State start(false);
     start.set_start();
@@ -373,7 +358,7 @@ State addAccepting() {
 void makeOperation(stack<pair<State, State>> &graphsStack, char &i) {
 
     //dummy is to differ graph from single state
-    
+
     /* grab graph 1 form stack*/
     pair<State, State> graph1;
     graph1 = graphsStack.top();
@@ -382,8 +367,8 @@ void makeOperation(stack<pair<State, State>> &graphsStack, char &i) {
     /*start and accepting for graph 1*/
     State start1 = graph1.first;
     State end1 = graph1.second;
-    
-    /* newly added terminals*/  
+
+    /* newly added terminals*/
     State start = addStart();
     State accepting = addAccepting();
 
@@ -393,37 +378,48 @@ void makeOperation(stack<pair<State, State>> &graphsStack, char &i) {
 
         /* if single state*/
         if (end1.is_dummy_state()) {
-            start.add_to_table(EPS, start1);
-            start1.add_to_table(EPS, start);
-            start.add_to_table(EPS, accepting);
-            return;
+
+            ///here it is not EPS, it is the accepting letter
+            start.add_to_table(EPS, &start1);
+
+            start1.add_to_table(EPS, &start);
+            start1.add_to_table(EPS, &accepting);
+            start.add_to_table(EPS, &accepting);
+        } else {
+
+            /* if full graph*/
+
+            ///here it is also not EPS
+            start.add_to_table(EPS, &start1);
+
+            start.add_to_table(EPS, &accepting);
+            start1.add_to_table(EPS, &start);
+            end1.add_to_table(EPS, &accepting);
+
+            end1.set_is_accepted(false);
         }
-
-        /* if full graph*/
-        start.add_to_table(EPS, accepting);
-        start.add_to_table(EPS, start1);
-
-        start1.add_to_table(EPS, start);
-        end1.add_to_table(EPS, accepting);
-
     } else if (i == '+') {
 
         /* if single state*/
         if (end1.is_dummy_state()) {
-            start.add_to_table(EPS, start1);
-            start1.add_to_table(EPS, start);
-            start.add_to_table(EPS, accepting);
-            return;
+            ///here it is also not EPS
+            start.add_to_table(EPS, &start1);
+
+            start1.add_to_table(EPS, &start);
+            start.add_to_table(EPS, &accepting);
+        } else {
+            /* if full graph*/
+
+            //start.add_to_table(EPS, accepting);
+
+            ///here it is also not EPS
+            start.add_to_table(EPS, &start1);
+
+            start1.add_to_table(EPS, &start);
+            end1.add_to_table(EPS, &accepting);
+
+            end1.set_is_accepted(false);
         }
-
-        /* if full graph*/
-
-        //start.add_to_table(EPS, accepting);
-        start.add_to_table(EPS, start1);
-
-        start1.add_to_table(EPS, start);
-        end1.add_to_table(EPS, accepting);
-
     } else if (i == '|') {
 
         /*grab graph 2 form stack*/
@@ -436,22 +432,23 @@ void makeOperation(stack<pair<State, State>> &graphsStack, char &i) {
         State end2 = graph2.second;
 
         /*construct OR graph*/
-        start.add_to_table(EPS, start1);
-        start.add_to_table(EPS, start2);
+        start.add_to_table(EPS, &start1);
+        start.add_to_table(EPS, &start2);
 
         /* graph 1 is single state */
         if (end1.is_dummy_state()) {
-            start1.add_to_table(EPS, accepting);
-        }else {
-            end1.add_to_table(EPS, accepting);
+            start1.add_to_table(EPS, &accepting);
+        } else {
+            end1.add_to_table(EPS, &accepting);
+            end1.set_is_accepted(false);
         }
-
 
         /* graph 2 is single state */
         if (end2.is_dummy_state()) {
-            start1.add_to_table(EPS, accepting);
-        }else{
-            end2.add_to_table(EPS, accepting);
+            start1.add_to_table(EPS, &accepting);
+        } else {
+            end2.add_to_table(EPS, &accepting);
+            end2.set_is_accepted(false);
         }
 
     } else if (i == '~') {
@@ -464,31 +461,30 @@ void makeOperation(stack<pair<State, State>> &graphsStack, char &i) {
         State end2 = graph2.second;
 
 
-
+        start = start1;
         /*if graph 1 is single state*/
         if (end1.is_dummy_state()) {
-            start1.add_to_table(EPS, start2);
-        }else{
-            end1.add_to_table(EPS, start2);
+            start1.add_to_table(EPS, &start2);
+        } else {
+            end1.add_to_table(EPS, &start2);
+            end1.set_is_accepted(false);
         }
 
         /*if graph 2 is single state*/
-        if (end2.is_dummy_state()){
-            start2.add_to_table(EPS, end);
-        }else{
-            end2.add_to_table(EPS, end);
+        if (end2.is_dummy_state()) {
+            start2.add_to_table(EPS, &accepting);
+            accepting = start2;
+        } else {
+            end2.add_to_table(EPS, &accepting);
+            end2.set_is_accepted(false);
+            accepting = end2;
         }
-
     }
 
+    graphsStack.push(make_pair(start, accepting));
 }
 
 void evaluatePostfix() {
-//    cout << "**********************" << endl;
-    for (int i = 0; i < postfixExpressions.size(); i++) {
-        cout << postfixExpressions[i].second << endl;
-    }
-
 
     for (int i = 0; i < postfixExpressions.size(); ++i) {
         cout << postfixExpressions[i].second << endl;
@@ -497,7 +493,6 @@ void evaluatePostfix() {
         for (int j = 0; j < postfixExpressions[i].second.length(); ++j) {
 
             char c = postfixExpressions[i].second[j];
-//            cout << c << endl;
             if (isSymbol(postfixExpressions[i].second[j])) {
                 string type = transitionType[c];
                 State state1(false);
@@ -509,33 +504,166 @@ void evaluatePostfix() {
             }
 
         }
+        pair<State, State> tempGraph;
+        tempGraph = graphsStack.top();
+        graphsStack.pop();
 
-        //handling kleene closure for final biggest graph of postfix
-        if (graphsStack.size() == 1) {
-            Graph tempGraph = graphsStack.top();
-            graphsStack.pop();
+        allGraphs.push_back(tempGraph);
+    }
+}
 
-            if (tempGraph.closureApplied == true) {
-                Graph newGraph;
-                newGraph.start.onEntringEdge = tempGraph.start.onEntringEdge;
 
-                newGraph.start.next[EPS].push_back(tempGraph.start);
-                newGraph.start.next[EPS].push_back(tempGraph.accepting);
+pair<State, State> constructPuncGraph() {
 
-                tempGraph = newGraph;
+    State start = addStart();
+    State accepting = addAccepting();
+    char EPS = '#';
+
+    for (int i = 0; i < punctuation.size(); ++i) {
+        State newState(false);
+        char punc = punctuation[i][0];
+        start.add_to_table(punc, &newState);
+        newState.add_to_table(EPS, &accepting);
+    }
+
+    return make_pair(start, accepting);
+}
+
+
+pair<State, State> constructKWGraph() {
+    char EPS = '#';
+
+    State start = addStart();
+    State accepting = addAccepting();
+
+    vector<pair<State, State>> accumGraphs;
+
+    for (int i = 0; i < keywords.size(); i++) {
+        State oldState = addStart();
+        for (int j = 0; j < keywords[i].length(); ++j) {
+            State newState(false);
+            oldState.add_to_table(keywords[i][j], &newState);
+            oldState = newState;
+        }
+        oldState.add_to_table(EPS, &accepting);
+        accumGraphs.push_back(make_pair(start, accepting));
+    }
+
+    State KWStart = addStart();
+    State KWAccepting = addAccepting();
+    for (int i = 0; i < accumGraphs.size(); i++) {
+        KWStart.add_to_table(EPS, &accumGraphs[i].first);
+        accumGraphs[i].second.add_to_table(EPS, &KWAccepting);
+    }
+
+    return make_pair(KWStart, KWAccepting);
+}
+
+pair<State, State> cosntructOpGraph() {
+
+    vector <string> relopTokens;
+    char EPS = '#';
+
+    State start = addStart();
+    State accepting = addAccepting();
+
+    for (int i = 0; i < lines.size(); ++i) {
+
+        int index = lines[i].find(":");
+
+        string LHS = lines[i].substr(0, index);
+
+        if (!LHS.compare("relop")) {
+            relopTokens = split(lines[i].substr((index + 1)), '|');
+
+            for (int j = 0; j < relopTokens.size(); ++j) {
+                State newState(false);
+                if (relopTokens[i][0] == '=' && relopTokens[i].length() == 1) {
+                    newState.set_is_accepted(true);
+                    newState.set_name("assign");
+                }
+                start.add_to_table(relopTokens[i][0], &newState);
             }
-            graphsStack.push(tempGraph);
+
+            for (int j = 0; j < relopTokens.size(); ++j) {
+                if (relopTokens[i].length() > 1) {
+                    State newState(false);
+                    newState.set_name("relop");
+                    newState.set_is_accepted(true);
+                    start.add_to_table(relopTokens[i][0], &newState);
+
+                    newState.add_to_table(EPS, &accepting);
+                }
+            }
+
+        }
+        if (!LHS.compare("addop")) {
+            relopTokens = split(lines[i].substr((index + 1)), '|');
+
+            State newState1(false);
+            start.add_to_table(EPS, &newState1);
+
+            State newState2(false);
+            start.add_to_table(EPS, &newState2);
+
+            State finalState(true);
+            finalState.set_name("addop");
+            newState1.add_to_table(EPS, &finalState);
+            newState2.add_to_table(EPS, &finalState);
+
+            finalState.add_to_table(EPS, &accepting);
         }
 
-//            Graph temp = graphsStack.top();
-//            graphsStack.pop();
-//            temp.accepting.definition = postfixExpressions[i].first;
-//            graphsStack.push(temp);
-//
-//        cout << graphsStack.size() << endl;
-//            Graph formedNFA = graphsStack.top();
-//            formedNFAs.push_back(formedNFA);
+        if(!LHS.compare("mulop")){
+            relopTokens = split(lines[i].substr((index + 1)), '|');
+
+            State newState1(false);
+            start.add_to_table(EPS, &newState1);
+
+            State newState2(false);
+            start.add_to_table(EPS, &newState2);
+
+            State finalState(true);
+            finalState.set_name("mulop");
+            newState1.add_to_table(EPS, &finalState);
+            newState2.add_to_table(EPS, &finalState);
+
+            finalState.add_to_table(EPS, &accepting);
+        }
     }
+
+    return make_pair(start, accepting);
+}
+
+
+pair<State, State> unionAllGraphs() {
+
+    char EPS = '#';
+    State globalStart = addStart();
+    State globalAccepting = addAccepting();
+
+
+    pair<State, State> puncGraph, KWGraph, operatorsGraph;
+    puncGraph = constructPuncGraph();
+    KWGraph = constructKWGraph();
+    operatorsGraph = cosntructOpGraph();
+
+    allGraphs.push_back(puncGraph);
+    allGraphs.push_back(KWGraph);
+    allGraphs.push_back(operatorsGraph);
+
+    for (int i = 0; i < allGraphs.size(); ++i) {
+        State subStart = allGraphs[i].first;
+        State subAccepting = allGraphs[i].second;
+
+        globalStart.add_to_table(EPS, &subStart);
+        subAccepting.add_to_table(EPS, &globalAccepting);
+    }
+
+
+    ///add graphs of other lines(punc - keywords - operators)
+
+    return make_pair(globalStart, globalAccepting);
 }
 
 

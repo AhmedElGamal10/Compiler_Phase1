@@ -17,18 +17,22 @@ State.h
 /home/ahmed/Compiler_Phase1/State.h
 
 /home/ahmed/Compiler_Phase1/State.cpp
+iostream
+-
+bits/stdc++.h
+-
 State.h
 /home/ahmed/Compiler_Phase1/State.h
 
 /home/ahmed/Compiler_Phase1/State.h
+string
+-
 vector
 -
 map
 -
-bits/stdc++.h
-/home/ahmed/Compiler_Phase1/bits/stdc++.h
-iostream
-/home/ahmed/Compiler_Phase1/iostream
+set
+-
 
 /home/ahmed/Compiler_Phase1/main.cpp
 bits/stdc++.h
