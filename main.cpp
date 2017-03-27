@@ -445,7 +445,7 @@ void makeOperation(stack<pair<State, State>> &graphsStack, char &i) {
 
         /* graph 2 is single state */
         if (end2.is_dummy_state()) {
-            start1.add_to_table(EPS, &accepting);
+            start2.add_to_table(EPS, &accepting);
         } else {
             end2.add_to_table(EPS, &accepting);
             end2.set_is_accepted(false);
@@ -488,6 +488,9 @@ void evaluatePostfix() {
 
     for (int i = 0; i < postfixExpressions.size(); ++i) {
         cout << postfixExpressions[i].second << endl;
+
+        if (i > 1)
+            break;
 
         stack<pair<State, State>> graphsStack;
         for (int j = 0; j < postfixExpressions[i].second.length(); ++j) {
@@ -562,7 +565,7 @@ pair<State, State> constructKWGraph() {
 
 pair<State, State> cosntructOpGraph() {
 
-    vector <string> relopTokens;
+    vector<string> relopTokens;
     char EPS = '#';
 
     State start = addStart();
@@ -615,7 +618,7 @@ pair<State, State> cosntructOpGraph() {
             finalState.add_to_table(EPS, &accepting);
         }
 
-        if(!LHS.compare("mulop")){
+        if (!LHS.compare("mulop")) {
             relopTokens = split(lines[i].substr((index + 1)), '|');
 
             State newState1(false);
@@ -667,6 +670,9 @@ pair<State, State> unionAllGraphs() {
     return make_pair(globalStart, globalAccepting);
 }
 
+pair<State, State> getNFA() {
+    return unionAllGraphs();
+}
 
 void parseFile() {
     string line;
@@ -680,6 +686,33 @@ void parseFile() {
         cout << "Unable to open file";
 }
 
+void printGraph(State start) {
+    map<char, vector<State *> > table = start.get_table();
+
+    typedef std::map<char, vector<State *> >::iterator it_type;
+    for (it_type iterator = table.begin(); iterator != table.end(); iterator++) {
+        vector<State *> states = iterator->second;
+        cout << iterator->first << endl;
+
+        for (int j = 0; j < states.size(); ++j) {
+            cout << "is acceptence " << states[j]->is_accept() << endl;
+
+            if(states[j]->is_accept()){
+                cout << "letter is " << endl;
+            }
+
+            if(iterator->first == '#'){
+                printGraph(states[j]);
+            }
+
+        }
+        // iterator->first = key
+        // iterator->second = value
+        // Repeat if you also want to iterate through the second map.
+    }
+
+
+}
 
 int main() {
     string file[] = {"letter = a-z | A-Z",
@@ -708,7 +741,9 @@ int main() {
     identifyExp(lines);
 
     constructPostfix();
-//    evaluatePostfix();
+    evaluatePostfix();
+    State start = getNFA().first;
+    printGraph(start);
 
     return 0;
 }

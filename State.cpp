@@ -20,6 +20,7 @@ State::State(bool state) {
 
 void State::set_start() {
     this->is_start = true;
+    this->is_accepted = true;
 }
 
 bool State::is_dummy_state() {
@@ -86,4 +87,8 @@ void State::print(void) {
         }
         cout << endl;
     }
+}
+
+map<char, vector<State *> > State::get_table() {
+    return this->table;
 }

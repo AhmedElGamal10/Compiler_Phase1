@@ -26,10 +26,13 @@ class State
     void set_start();
 
     int get_id();
+    map<char , vector<State*> > get_table();
+
     string get_name();
     bool is_accept();
     bool is_dummy_state();
     bool is_start_start();
+
 
     /*add next state can be reached form this state on input*/
     void add_to_table(char input, State* next);
