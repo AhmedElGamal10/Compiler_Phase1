@@ -505,6 +505,7 @@ void evaluatePostfix() {
 
         }
         pair<State, State> tempGraph;
+        tempGraph.second.set_name(postfixExpressions[i].first);
         tempGraph = graphsStack.top();
         graphsStack.pop();
 
